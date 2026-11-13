@@ -1,8 +1,11 @@
 import re
 import requests
 import unicodedata
+import json
 
-BASE_URL = "https://www.tennisabstract.com"
+
+base_url = "https://www.tennisabstract.com"
+match_array = re.compile(r"\bvar\s+morematchmx\s*=\s*(?=\[)")
 
 def player_input(player_name):
     name = unicodedata.normalize("NFKD", player_name)
@@ -21,3 +24,8 @@ def download(url):
         return response.text
     except requests.RequestException as error:
         raise RuntimeError(f"Could not download {url}") from error
+
+def parse_match_rows(js):
+    start = match_array.search(js).end()
+    rows, _ = json.JSONDecoder().raw_decode(js[start:])
+    return rows
