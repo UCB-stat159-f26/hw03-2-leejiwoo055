@@ -47,7 +47,7 @@ def find_birth_date(slug):
             return birth_date
     raise ValueError(f"Could not find a birth date for {slug}.")
 
-def clean_matches(rows, birth_date):
+def clean_matches(rows, player_birth_date):
     columns = ["match_date", "tournament", "surface", "result", "opponent", "age_value"]
     records = [
         (row[0], row[1], row[2], row[4], row[11], row[16])
@@ -56,22 +56,22 @@ def clean_matches(rows, birth_date):
     matches = pd.DataFrame(records, columns=columns)
     dates = pd.to_datetime(matches["match_date"], format="%Y%m%d", errors="coerce")
     age_values = matches.pop("age_value").astype("string").str.strip()
-    birth_date = age_values.str.fullmatch(r"\d{8}", na=False)
+    is_birth_date = age_values.str.fullmatch(r"\d{8}", na=False)
     opponent_birth_dates = pd.to_datetime(
-        age_values.where(birth_date), format="%Y%m%d", errors="coerce"
+        age_values.where(is_birth_date), format="%Y%m%d", errors="coerce"
     )
-    calculated_ages = (dates - opponent_birth_dates).dt.days / 365
-    reported_ages = pd.to_numeric(age_values.where(~birth_date), errors="coerce")
+    calculated_ages = (dates - opponent_birth_dates).dt.days / 365.25
+    reported_ages = pd.to_numeric(age_values.where(~is_birth_date), errors="coerce")
     matches["match_date"] = dates
-    matches["player_age"] = (dates - birth_date).dt.days / 365
-    matches["opponent_age"] = reported_ages.where(~birth_date, calculated_ages)
+    matches["player_age"] = (dates - player_birth_date).dt.days / 365.25
+    matches["opponent_age"] = reported_ages.where(~is_birth_date, calculated_ages)
     matches["age_difference"] = matches["player_age"] - matches["opponent_age"]
     valid = matches["result"].isin(["W", "L"]) & matches["age_difference"].notna()
     return matches.loc[valid].sort_values("match_date").reset_index(drop=True)
 
 def career_matches(player_name):
     slug = player_input(player_name)
-    js = _download(f"{base_url}/jsmatches/{slug}Career.js")
+    js = download(f"{base_url}/jsmatches/{slug}Career.js")
     if not js or not match_array.search(js):
         raise ValueError(f"No Tennis Abstract career data found for {player_name!r}.")
     rows = parse_match_rows(js)
