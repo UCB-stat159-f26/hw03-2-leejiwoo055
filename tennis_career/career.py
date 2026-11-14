@@ -46,7 +46,7 @@ def find_birth_date(slug):
             return birth_date
     raise ValueError(f"Could not find a birth date for {slug}.")
 
-def _clean_matches(rows, birth_date):
+def clean_matches(rows, birth_date):
     columns = ["match_date", "tournament", "surface", "result", "opponent", "age_value"]
     records = [
         (row[0], row[1], row[2], row[4], row[11], row[16])
@@ -67,3 +67,15 @@ def _clean_matches(rows, birth_date):
     matches["age_difference"] = matches["player_age"] - matches["opponent_age"]
     valid = matches["result"].isin(["W", "L"]) & matches["age_difference"].notna()
     return matches.loc[valid].sort_values("match_date").reset_index(drop=True)
+
+def career_matches(player_name):
+    slug = player_input(player_name)
+    js = _download(f"{base_url}/jsmatches/{slug}Career.js")
+    if not js or not match_array.search(js):
+        raise ValueError(f"No Tennis Abstract career data found for {player_name!r}.")
+    rows = parse_match_rows(js)
+    birth_date = find_birth_date(slug)
+    matches = clean_matches(rows, birth_date)
+    if matches.empty:
+        raise ValueError(f"No matches with usable age data for {player_name!r}.")
+    return matches
