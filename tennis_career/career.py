@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import pandas as pd
 import re
 import requests
@@ -79,3 +80,14 @@ def career_matches(player_name):
     if matches.empty:
         raise ValueError(f"No matches with usable age data for {player_name!r}.")
     return matches
+
+def plot_career_matches(matches):
+    _, ax = plt.subplots()
+
+    for result, label in [("W", "Win"), ("L", "Loss")]:
+        group = matches[matches["result"] == result]
+        ax.scatter(group["player_age"], group["age_difference"], label=label)
+    ax.set_xlabel("Player age (years)")
+    ax.set_ylabel("Player age − opponent age (years)")
+    ax.legend()
+    return ax
