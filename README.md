@@ -37,7 +37,7 @@ ax = plot_career_matches(matches)
 ax.figure.savefig("figure/serena-career.png", dpi=150, bbox_inches="tight")
 plt.show()
 ```
-![Serena Williams career scatter plot colored by match result](serena-career.png)
+![Serena Williams career scatter plot](figure/serena-career.png)
 
 The horizontal axis shows the player's age at each match. The vertical axis
 shows the player's age minus the opponent's age, so a positive value means
