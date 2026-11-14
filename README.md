@@ -13,6 +13,7 @@ For HW 3, I created a Python package that downloads career match data from [Tenn
 | `tests/test_career.py` | Tests both opponent-age formats using local JavaScript files. |
 | `tests/data/` | Contains the Serena Williams and Rafael Nadal career data used by the tests. |
 | `.gitignore` | Lists generated files and folders that Git should ignore. |
+| `figure/serena-career.png` | Serena Williams’s career scatter plot. |
 
 ## Installation
 
@@ -32,9 +33,11 @@ from tennis_career import career_matches, plot_career_matches
 matches = career_matches("Serena Williams")
 print(matches.head())
 
-plot_career_matches(matches)
+ax = plot_career_matches(matches)
+ax.figure.savefig("figure/serena-career.png", dpi=150, bbox_inches="tight")
 plt.show()
 ```
+![Serena Williams career scatter plot colored by match result](serena-career.png)
 
 The horizontal axis shows the player's age at each match. The vertical axis
 shows the player's age minus the opponent's age, so a positive value means
